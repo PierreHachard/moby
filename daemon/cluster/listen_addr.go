@@ -143,6 +143,26 @@ func getDataPathPort(portNum uint32) (uint32, error) {
 	return portNum, nil
 }
 
+// getGossipControlPort validates lan config tcp/udp port number.
+// if no port is set, the default (7946) is returned
+// valid port numbers are between 1024 and 49151
+func getGossipControlPort(portNum uint32) (uint32, error) {
+	// if the value comes as 0 by any reason we set it to default value 7946
+	if portNum == 0 {
+		portNum = 7946
+		return portNum, nil
+	}
+	// IANA procedures for each range in detail
+	// The Well Known Ports, aka the System Ports, from 0-1023
+	// The Registered Ports, aka the User Ports, from 1024-49151
+	// The Dynamic Ports, aka the Private Ports, from 49152-65535
+	// So we can allow range between 1024 to 49151
+	if portNum < 1024 || portNum > 49151 {
+		return 0, fmt.Errorf("GossipControl port number is not in valid range (1024-49151) : %d", portNum)
+	}
+	return portNum, nil
+}
+
 func resolveDataPathAddr(dataPathAddr string) (string, error) {
 	if dataPathAddr == "" {
 		// dataPathAddr is not defined

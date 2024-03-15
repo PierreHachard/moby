@@ -404,6 +404,73 @@ func TestServiceWithDataPathPortInit(t *testing.T) {
 	assert.NilError(t, err)
 }
 
+func TestServiceWithGossipControlPortInit(t *testing.T) {
+	skip.If(t, testEnv.DaemonInfo.OSType == "windows")
+	skip.If(t, testEnv.IsRootless, "rootless mode doesn't support Swarm-mode")
+	ctx := setupTest(t)
+
+	var gossipcontrolPort uint32 = 7777
+	d := swarm.NewSwarm(ctx, t, testEnv, daemon.WithSwarmGossipControlPort(gossipcontrolPort))
+	c := d.NewClientT(t)
+	// Create a overlay network
+	name := "saanvisthira" + t.Name()
+	overlayID := network.CreateNoError(ctx, t, c, name,
+		network.WithDriver("overlay"))
+
+	var instances uint64 = 1
+	serviceID := swarm.CreateService(ctx, t, d,
+		swarm.ServiceWithReplicas(instances),
+		swarm.ServiceWithName(name),
+		swarm.ServiceWithNetwork(name),
+	)
+
+	poll.WaitOn(t, swarm.RunningTasksCount(ctx, c, serviceID, instances), swarm.ServicePoll)
+
+	info := d.Info(t)
+	assert.Equal(t, info.Swarm.Cluster.GossipControlPort, gossipcontrolPort)
+	err := c.ServiceRemove(ctx, serviceID)
+	assert.NilError(t, err)
+	poll.WaitOn(t, noServices(ctx, c), swarm.ServicePoll)
+	poll.WaitOn(t, swarm.NoTasks(ctx, c), swarm.ServicePoll)
+	err = c.NetworkRemove(ctx, overlayID)
+	assert.NilError(t, err)
+	c.Close()
+	err = d.SwarmLeave(ctx, t, true)
+	assert.NilError(t, err)
+	d.Stop(t)
+
+	// Clean up , set it back to original one to make sure other tests don't fail
+	// call without gossipcontrol port option.
+	d = swarm.NewSwarm(ctx, t, testEnv)
+	defer d.Stop(t)
+	nc := d.NewClientT(t)
+	defer nc.Close()
+	// Create a overlay network
+	name = "not-saanvisthira" + t.Name()
+	overlayID = network.CreateNoError(ctx, t, nc, name,
+		network.WithDriver("overlay"))
+
+	serviceID = swarm.CreateService(ctx, t, d,
+		swarm.ServiceWithReplicas(instances),
+		swarm.ServiceWithName(name),
+		swarm.ServiceWithNetwork(name),
+	)
+
+	poll.WaitOn(t, swarm.RunningTasksCount(ctx, nc, serviceID, instances), swarm.ServicePoll)
+
+	info = d.Info(t)
+	var defaultGossipControlPort uint32 = 7946
+	assert.Equal(t, info.Swarm.Cluster.GossipControlPort, defaultGossipControlPort)
+	err = nc.ServiceRemove(ctx, serviceID)
+	assert.NilError(t, err)
+	poll.WaitOn(t, noServices(ctx, nc), swarm.ServicePoll)
+	poll.WaitOn(t, swarm.NoTasks(ctx, nc), swarm.ServicePoll)
+	err = nc.NetworkRemove(ctx, overlayID)
+	assert.NilError(t, err)
+	err = d.SwarmLeave(ctx, t, true)
+	assert.NilError(t, err)
+}
+
 func TestServiceWithDefaultAddressPoolInit(t *testing.T) {
 	skip.If(t, testEnv.DaemonInfo.OSType == "windows")
 	skip.If(t, testEnv.IsRootless, "rootless mode doesn't support Swarm-mode")

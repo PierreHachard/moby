@@ -88,12 +88,13 @@ type Daemon struct {
 	rootlessXDGRuntimeDir      string
 
 	// swarm related field
-	swarmListenAddr string
-	SwarmPort       int // FIXME(vdemeester) should probably not be exported
-	DefaultAddrPool []string
-	SubnetSize      uint32
-	DataPathPort    uint32
-	OOMScoreAdjust  int
+	swarmListenAddr   string
+	SwarmPort         int // FIXME(vdemeester) should probably not be exported
+	DefaultAddrPool   []string
+	SubnetSize        uint32
+	DataPathPort      uint32
+	GossipControlPort uint32
+	OOMScoreAdjust    int
 	// cached information
 	CachedInfo system.Info
 }

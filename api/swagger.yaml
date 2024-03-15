@@ -3400,6 +3400,15 @@ definitions:
         format: "uint32"
         default: 4789
         example: 4789
+      GossipControlPort:
+        description: |
+          GossipControlPort specifies the control plane gossip discovery communication between all nodes.
+          Acceptable port range is 1024 to 49151.
+          If no port is set or is set to 0, the default port (7946) is used.
+        type: "integer"
+        format: "uint32"
+        default: 7946
+        example: 7946
       DefaultAddrPool:
         description: |
           Default Address Pool specifies default subnet pools for global scope

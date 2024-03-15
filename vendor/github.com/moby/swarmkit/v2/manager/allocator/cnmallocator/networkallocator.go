@@ -98,6 +98,9 @@ type NetworkConfig struct {
 
 	// VXLANUDPPort specifies the UDP port number for VXLAN traffic
 	VXLANUDPPort uint32
+
+	// LANConfigPort specifies the LAN config port number that is used for gossip traffic
+	LANConfigPort uint32
 }
 
 // New returns a new NetworkAllocator handle

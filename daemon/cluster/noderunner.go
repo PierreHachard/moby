@@ -58,6 +58,8 @@ type nodeStartConfig struct {
 	SubnetSize uint32
 	// DataPathPort contains Data path port (VXLAN UDP port) number that is used for data traffic.
 	DataPathPort uint32
+	// GossipControlPort contains Data path port (LAN config TCP/UDP port) number that is used for container network discovery.
+	GossipControlPort uint32
 	// JoinInProgress is set to true if a join operation has started, but
 	// not completed yet.
 	JoinInProgress bool
@@ -127,6 +129,7 @@ func (n *nodeRunner) start(conf nodeStartConfig) error {
 			DefaultAddrPool: conf.DefaultAddressPool,
 			SubnetSize:      conf.SubnetSize,
 			VXLANUDPPort:    conf.DataPathPort,
+			LANConfigPort:   conf.GossipControlPort,
 		},
 		JoinAddr:  joinAddr,
 		StateDir:  n.cluster.root,

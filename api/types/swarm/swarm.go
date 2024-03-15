@@ -15,6 +15,7 @@ type ClusterInfo struct {
 	DefaultAddrPool        []string
 	SubnetSize             uint32
 	DataPathPort           uint32
+	GossipControlPort      uint32
 }
 
 // Swarm represents a swarm.
@@ -151,16 +152,17 @@ type ExternalCA struct {
 
 // InitRequest is the request used to init a swarm.
 type InitRequest struct {
-	ListenAddr       string
-	AdvertiseAddr    string
-	DataPathAddr     string
-	DataPathPort     uint32
-	ForceNewCluster  bool
-	Spec             Spec
-	AutoLockManagers bool
-	Availability     NodeAvailability
-	DefaultAddrPool  []string
-	SubnetSize       uint32
+	ListenAddr        string
+	AdvertiseAddr     string
+	DataPathAddr      string
+	DataPathPort      uint32
+	GossipControlPort uint32
+	ForceNewCluster   bool
+	Spec              Spec
+	AutoLockManagers  bool
+	Availability      NodeAvailability
+	DefaultAddrPool   []string
+	SubnetSize        uint32
 }
 
 // JoinRequest is the request used to join a swarm.

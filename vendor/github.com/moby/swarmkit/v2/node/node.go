@@ -19,6 +19,7 @@ import (
 	"github.com/docker/docker/pkg/plugingetter"
 	"github.com/docker/go-metrics"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/hashicorp/memberlist"
 	"github.com/moby/swarmkit/v2/agent"
 	"github.com/moby/swarmkit/v2/agent/exec"
 	"github.com/moby/swarmkit/v2/api"
@@ -162,6 +163,7 @@ type Node struct {
 	notifyNodeChange chan *agent.NodeChanges // used by the agent to relay node updates from the dispatcher Session stream to (*Node).run
 	unlockKey        []byte
 	vxlanUDPPort     uint32
+	lanconfigPort    uint32
 }
 
 type lastSeenRole struct {
@@ -279,6 +281,18 @@ func configVXLANUDPPort(ctx context.Context, vxlanUDPPort uint32) {
 	log.G(ctx).Infof("initialized VXLAN UDP port to %d ", vxlanUDPPort)
 }
 
+// configLANConfigPort sets gossip port in memberlist
+func configLANConfigPort(ctx context.Context, lanconfigPort int) {
+	memberlistConfig := memberlist.DefaultLANConfig()
+	memberlistConfig.BindPort = lanconfigPort
+	memberlistConfig.AdvertisePort = lanconfigPort
+	if memberlist, err := memberlist.Create(memberlistConfig); memberlist != nil && err != nil {
+		log.G(ctx).WithError(err).Error("failed to configure LAN CONFIG port")
+		return
+	}
+	log.G(ctx).Infof("initialized LAN CONFIG port to %d ", lanconfigPort)
+}
+
 func (n *Node) run(ctx context.Context) (err error) {
 	defer func() {
 		n.err = err
@@ -371,6 +385,10 @@ func (n *Node) run(ctx context.Context) (err error) {
 					if nodeChanges.Node.VXLANUDPPort != 0 {
 						n.vxlanUDPPort = nodeChanges.Node.VXLANUDPPort
 						configVXLANUDPPort(ctx, n.vxlanUDPPort)
+					}
+					if nodeChanges.Node.LANConfigPort != 0 {
+						n.lanconfigPort = nodeChanges.Node.LANConfigPort
+						configLANConfigPort(ctx, n.lanconfigPort)
 					}
 					// This is a bit complex to be backward compatible with older CAs that
 					// don't support the Node.Role field. They only use what's presently

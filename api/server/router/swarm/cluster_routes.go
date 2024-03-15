@@ -34,6 +34,11 @@ func (sr *swarmRouter) initCluster(ctx context.Context, w http.ResponseWriter, r
 	if versions.LessThan(version, "1.40") {
 		req.DataPathPort = 0
 	}
+	// GossipControlPort was added in API 1.45. Ignore this option on older API versions.
+	if versions.LessThan(version, "1.45") {
+		req.GossipControlPort = 0
+	}
+
 	nodeID, err := sr.backend.Init(req)
 	if err != nil {
 		log.G(ctx).WithContext(ctx).WithError(err).Debug("Error initializing swarm")

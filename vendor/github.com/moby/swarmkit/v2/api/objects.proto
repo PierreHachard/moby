@@ -85,6 +85,10 @@ message Node {
 	// VXLANUDPPort specifies the UDP port for VXLAN traffic.
 	// This information is passed from cluster object to individual nodes.
 	uint32 VXLANUDPPort = 11;
+
+	// LANConfigPort specifies the port for container network discovery traffic.
+	// This information is passed from cluster object to individual nodes.
+	uint32 LANConfigPort = 12;
 }
 
 message Service {
@@ -394,6 +398,9 @@ message Cluster {
 
 	// VXLANUDPPort specifies the UDP port for VXLAN traffic.
 	uint32 VXLANUDPPort = 13;
+
+	// LANConfigPort specifies the port for container network discovery traffic.
+	uint32 LANConfigPort = 14;
 }
 
 // Secret represents a secret that should be passed to a container or a node,

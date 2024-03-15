@@ -322,6 +322,7 @@ func (s *Server) IssueNodeCertificate(ctx context.Context, request *api.IssueNod
 				},
 			}
 			node.VXLANUDPPort = clusters[0].VXLANUDPPort
+			node.LANConfigPort = clusters[0].LANConfigPort
 			return store.CreateNode(tx, node)
 		})
 		if err == nil {

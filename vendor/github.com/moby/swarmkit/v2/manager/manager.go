@@ -955,10 +955,12 @@ func (m *Manager) becomeLeader(ctx context.Context) {
 			m.config.FIPS,
 			nil,
 			0,
+			0,
 			0)
 
 		// If defaultAddrPool is valid we update cluster object with new value
 		// If VXLANUDPPort is not 0 then we call update cluster object with new value
+		// If LANConfigPort is not 0 then we call update cluster object with new value
 		if m.config.NetworkConfig != nil {
 			if m.config.NetworkConfig.DefaultAddrPool != nil {
 				clusterObj.DefaultAddressPool = m.config.NetworkConfig.DefaultAddrPool
@@ -967,6 +969,10 @@ func (m *Manager) becomeLeader(ctx context.Context) {
 
 			if m.config.NetworkConfig.VXLANUDPPort != 0 {
 				clusterObj.VXLANUDPPort = m.config.NetworkConfig.VXLANUDPPort
+			}
+
+			if m.config.NetworkConfig.LANConfigPort != 0 {
+				clusterObj.LANConfigPort = m.config.NetworkConfig.LANConfigPort
 			}
 		}
 		err := store.CreateCluster(tx, clusterObj)
@@ -977,7 +983,7 @@ func (m *Manager) becomeLeader(ctx context.Context) {
 
 		// Add Node entry for ourself, if one
 		// doesn't exist already.
-		freshCluster := nil == store.CreateNode(tx, managerNode(nodeID, m.config.Availability, clusterObj.VXLANUDPPort))
+		freshCluster := nil == store.CreateNode(tx, managerNode(nodeID, m.config.Availability, clusterObj.VXLANUDPPort, clusterObj.LANConfigPort))
 
 		if freshCluster {
 			// This is a fresh swarm cluster. Add to store now any initial
@@ -1018,8 +1024,8 @@ func (m *Manager) becomeLeader(ctx context.Context) {
 
 	// If DefaultAddrPool is null, Read from store and check if
 	// DefaultAddrPool info is stored in cluster object
-	// If VXLANUDPPort is 0, read it from the store - cluster object
-	if m.config.NetworkConfig == nil || m.config.NetworkConfig.DefaultAddrPool == nil || m.config.NetworkConfig.VXLANUDPPort == 0 {
+	// If VXLANUDPPort or LANCONFIGPort is 0, read it from the store - cluster object
+	if m.config.NetworkConfig == nil || m.config.NetworkConfig.DefaultAddrPool == nil || m.config.NetworkConfig.VXLANUDPPort == 0 || m.config.NetworkConfig.LANConfigPort == 0 {
 		var cluster *api.Cluster
 		s.View(func(tx store.ReadTx) {
 			cluster = store.GetCluster(tx, clusterID)
@@ -1036,6 +1042,12 @@ func (m *Manager) becomeLeader(ctx context.Context) {
 				m.config.NetworkConfig = &cnmallocator.NetworkConfig{}
 			}
 			m.config.NetworkConfig.VXLANUDPPort = cluster.VXLANUDPPort
+		}
+		if cluster.LANConfigPort != 0 {
+			if m.config.NetworkConfig == nil {
+				m.config.NetworkConfig = &cnmallocator.NetworkConfig{}
+			}
+			m.config.NetworkConfig.LANConfigPort = cluster.LANConfigPort
 		}
 	}
 
@@ -1192,7 +1204,8 @@ func defaultClusterObject(
 	fips bool,
 	defaultAddressPool []string,
 	subnetSize uint32,
-	vxlanUDPPort uint32) *api.Cluster {
+	vxlanUDPPort uint32,
+	lanconfigPort uint32) *api.Cluster {
 	var caKey []byte
 	if rcaSigner, err := rootCA.Signer(); err == nil {
 		caKey = rcaSigner.Key
@@ -1228,11 +1241,12 @@ func defaultClusterObject(
 		DefaultAddressPool: defaultAddressPool,
 		SubnetSize:         subnetSize,
 		VXLANUDPPort:       vxlanUDPPort,
+		LANConfigPort:      lanconfigPort,
 	}
 }
 
 // managerNode creates a new node with NodeRoleManager role.
-func managerNode(nodeID string, availability api.NodeSpec_Availability, vxlanPort uint32) *api.Node {
+func managerNode(nodeID string, availability api.NodeSpec_Availability, vxlanPort uint32, lanconfigPort uint32) *api.Node {
 	return &api.Node{
 		ID: nodeID,
 		Certificate: api.Certificate{
@@ -1247,7 +1261,8 @@ func managerNode(nodeID string, availability api.NodeSpec_Availability, vxlanPor
 			Membership:   api.NodeMembershipAccepted,
 			Availability: availability,
 		},
-		VXLANUDPPort: vxlanPort,
+		VXLANUDPPort:  vxlanPort,
+		LANConfigPort: lanconfigPort,
 	}
 }
 

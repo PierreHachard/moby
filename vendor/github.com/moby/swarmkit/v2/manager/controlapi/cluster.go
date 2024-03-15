@@ -23,6 +23,8 @@ const (
 	inbuiltSubnetSize = 24
 	// VXLAN default port
 	defaultVXLANPort = 4789
+	// LAN config default port
+	defaultLANConfigPort = 7946
 )
 
 var (
@@ -277,6 +279,7 @@ func redactClusters(clusters []*api.Cluster) []*api.Cluster {
 			DefaultAddressPool:      cluster.DefaultAddressPool,
 			SubnetSize:              cluster.SubnetSize,
 			VXLANUDPPort:            cluster.VXLANUDPPort,
+			LANConfigPort:           cluster.LANConfigPort,
 		}
 		if newCluster.DefaultAddressPool == nil {
 			// This is just for CLI display. Set the inbuilt default pool for
@@ -286,6 +289,9 @@ func redactClusters(clusters []*api.Cluster) []*api.Cluster {
 		}
 		if newCluster.VXLANUDPPort == 0 {
 			newCluster.VXLANUDPPort = defaultVXLANPort
+		}
+		if newCluster.LANConfigPort == 0 {
+			newCluster.LANConfigPort = defaultLANConfigPort
 		}
 		redactedClusters = append(redactedClusters, newCluster)
 	}

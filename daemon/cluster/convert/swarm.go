@@ -43,6 +43,7 @@ func SwarmFromGRPC(c swarmapi.Cluster) types.Swarm {
 			DefaultAddrPool:        c.DefaultAddressPool,
 			SubnetSize:             c.SubnetSize,
 			DataPathPort:           c.VXLANUDPPort,
+			GossipControlPort       c.LANConfigPort,
 		},
 		JoinTokens: types.JoinTokens{
 			Worker:  c.RootCA.JoinTokens.Worker,

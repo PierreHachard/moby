@@ -22,6 +22,9 @@ keywords: "API, Docker, rcli, REST, documentation"
 * `POST /images/search` will always assume a `false` value for the `is-automated`
   field. Consequently, searching for `is-automated=true` will yield no results,
   while `is-automated=false` will be a no-op.
+* `POST /swarm/init` now accepts a `GossipControlPort` property to set gossip control port number.
+* `GET /info` now returns information about `GossipControlPort` that is currently used in swarm.
+* `GET /swarm` endpoint now returns `GossipControlPort` info.
 
 ## v1.44 API changes
 

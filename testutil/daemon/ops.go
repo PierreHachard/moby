@@ -88,10 +88,17 @@ func WithSwarmDefaultAddrPoolSubnetSize(subnetSize uint32) Option {
 	}
 }
 
-// WithSwarmDataPathPort sets the  swarm datapath port to use for swarm mode
+// WithSwarmDataPathPort sets the swarm datapath port to use for swarm mode
 func WithSwarmDataPathPort(datapathPort uint32) Option {
 	return func(d *Daemon) {
 		d.DataPathPort = datapathPort
+	}
+}
+
+// WithSwarmGossipControlPort sets the swarm gossipcontrol port to use for swarm mode
+func WithSwarmGossipControlPort(gossipcontrolPort uint32) Option {
+	return func(d *Daemon) {
+		d.GossipControlPort = gossipcontrolPort
 	}
 }
 

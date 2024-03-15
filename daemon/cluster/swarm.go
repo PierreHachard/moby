@@ -99,7 +99,12 @@ func (c *Cluster) Init(req types.InitRequest) (string, error) {
 		return "", err
 	}
 
-	port, err := getDataPathPort(req.DataPathPort)
+	datapathport, err := getDataPathPort(req.DataPathPort)
+	if err != nil {
+		return "", err
+	}
+
+	gossipcontrolport, err := getGossipControlPort(req.GossipControlPort)
 	if err != nil {
 		return "", err
 	}
@@ -114,7 +119,8 @@ func (c *Cluster) Init(req types.InitRequest) (string, error) {
 		DefaultAddressPool: req.DefaultAddrPool,
 		SubnetSize:         req.SubnetSize,
 		availability:       req.Availability,
-		DataPathPort:       port,
+		DataPathPort:       datapathport,
+		GossipControlPort:  gossipcontrolport,
 	})
 	if err != nil {
 		return "", err

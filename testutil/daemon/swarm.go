@@ -87,6 +87,9 @@ func (d *Daemon) SwarmInit(ctx context.Context, t testing.TB, req swarm.InitRequ
 	if d.DataPathPort > 0 {
 		req.DataPathPort = d.DataPathPort
 	}
+	if d.GossipControlPort > 0 {
+		req.GossipControlPort = d.GossipControlPort
+	}
 	cli := d.NewClientT(t)
 	defer cli.Close()
 	_, err := cli.SwarmInit(ctx, req)
